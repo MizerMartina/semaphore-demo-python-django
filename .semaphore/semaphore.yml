@@ -1,148 +1,136 @@
-# Use the latest stable version of Semaphore 2.0 YML syntax:
 version: v1.0
-
-# Name your pipeline. In case you connect multiple pipelines with promotions,
-# the name will help you differentiate between, for example, a CI build phase
-# and delivery phases.
-name: Semaphore Python / Django Example Pipeline
-
-# An agent defines the environment in which your code runs.
-# It is a combination of one of available machine types and operating
-# system images.
-# See https://docs.semaphoreci.com/article/20-machine-types
-# and https://docs.semaphoreci.com/article/32-ubuntu-1804-image
+name: First pipeline example
 agent:
   machine:
     type: e1-standard-2
-    os_image: ubuntu2004
-
-global_job_config:
-  prologue:
-    commands:
-      - sem-version python 3.8
-
-# Blocks are the heart of a pipeline and are executed sequentially.
-# Each block has a task that defines one or more jobs. Jobs define the
-# commands to execute.
-# See https://docs.semaphoreci.com/article/62-concepts
+    os_image: ubuntu1804
 blocks:
-  - name: "Install Dependencies"
+  - name: PRIPREMA TIKVICA
+    dependencies:
+      - PRIPREMA SAMPINJONA
+      - Priprema posuda
     task:
-      # This block installs all the python dependencies,
-      # as well as all the required Linux packages.
-      # The prologue section is always executed before each job on
-      # the block.
-      # See https://docs.semaphoreci.com/article/50-pipeline-yaml#prologue
-      prologue:
-        commands:
-          # Set the python version.
-          # See https://docs.semaphoreci.com/article/132-sem-service-managing-databases-and-services-on-linux
-          # Install Linux dependencies.
-          - sudo apt-get update && sudo apt-get install -y python3-dev && sudo apt-get install default-libmysqlclient-dev
       jobs:
-        - name: pip
+        - name: Priprema tikvica
           commands:
-            # Get the latest version of our source code from GitHub:
-            # See https://docs.semaphoreci.com/article/54-toolbox-reference#checkout
-            - checkout
-            # Restore dependencies from cache. This command will not fail in
-            # case of a cache miss. In case of a cache hit, pip can use it
-            # to speed up the installation.
-            # For more info on caching, see https://docs.semaphoreci.com/article/149-caching
-            - cache restore
-            # Install python dependencies.
-            # If not found in the cache, pip will download them.
-            - pip download --cache-dir .pip_cache -r requirements.txt
-            # Persist downloaded packages for future jobs.
-            - cache store
-
-  - name: "Run Code Analysis"
+            - echo "preseces tikvice na polovine" && sleep 2
+            - 'echo "izdubis tikvice kasikom, napravis camcic" && sleep 4'
+            - >-
+              echo "stavis meso tikvica u jednu serpu, verovatno u vecu" &&
+              sleep 1
+  - name: RINGLA 2
+    dependencies:
+      - PRIPREMA TIKVICA
     task:
-      # This block executes code analysis tests with pylint.
-      prologue:
-        commands:
-          - checkout
-          # At this point, the cache contains the downloaded packages ...
-          - cache restore
-          # ... so pip does the installation much faster.
-          - pip install -r requirements.txt --cache-dir .pip_cache
       jobs:
-        - name: Pylint
+        - name: 0.2l solje pirinca + 2x0.2l solje vode
           commands:
-            # list out files that are in directory and working tree
-            # grep -v will exclude the files being considered for pylint
-            # grep -E will matches files having .py extension
-            # This command will help to pass required python files to pylint along with pylint_djanog plugin
-            # Pylint with -E option will display only if there is any error
-            - git ls-files | grep -v 'migrations' | grep -v 'settings.py' | grep -v 'manage.py' | grep -E '.py$' |
-              xargs pylint -E --load-plugins=pylint_django
-
-  - name: "Run Unit Tests"
+            - echo "pomesas sastojke i stavis da se kuvaju"
+            - echo "isparila voda => skines sa ringle"
+            - echo "poklopis serpu da se upari pirinac" & sleep 30
+  - name: Preliv
+    dependencies:
+      - PRIPREMA TIKVICA
     task:
-      # This block runs the unit tests.
-      # Since the test require a database, we start the database here.
-      # Django automatically creates a test database schema.
-      prologue:
-        commands:
-          # Start a MySQL database. On Semaphore, databases run in the same
-          # environment as your code.
-          # See https://docs.semaphoreci.com/article/32-ubuntu-1804-image#databases-and-services
-          # Also https://docs.semaphoreci.com/article/54-toolbox-reference#sem-service
-          - sem-service start mysql
-          - checkout
-          - cache restore
-          - pip install -r requirements.txt --cache-dir .pip_cache
-      # Two parallel test jobs are executed.
       jobs:
-        - name: Model Test
+        - name: sampinjoni & pasirani paradajz & jaja +- zacini
           commands:
-            # Test the application's database models.
-            - python manage.py test tasks.tests.test_models
-        - name: View Test
-          commands:
-            # Test the application's views.
-            - python manage.py test tasks.tests.test_views
-
-  - name: "Run Browser Tests"
+            - echo "izmesati sastojke"
+            - echo "po ukusu dodas origano i seme lana"
+            - sleep 50
+  - name: Ringla
+    dependencies:
+      - RINGLA 1
+      - RINGLA 2
     task:
-      # This block runs browser-based tests.
-      # We need to set environment variables.
-      # See https://docs.semaphoreci.com/article/66-environment-variables-and-secrets
-      env_vars:
-        - name: DB_NAME
-          value: 'pydjango'
-      # This test requires the application to be running.
-      # We start the application server here.
-      prologue:
-        commands:
-          # Start MySQL database.
-          - sem-service start mysql
-          # Install mysql client
-          - sudo apt-get update && sudo apt-get install -y -qq mysql-client
-          # Create an empty database.
-          # We can connect to the db with root and a blank password.
-          - mysql --host=0.0.0.0 -uroot -e "create database $DB_NAME"
-          - checkout
-          - cache restore
-          - pip install -r requirements.txt --cache-dir .pip_cache
-          # Application is started.
-          - nohup python manage.py runserver 127.0.0.1:8732 &
       jobs:
-        - name: Browser Test
+        - name: '"Dinstanje mesa"'
           commands:
-            # Run browser tests on Google Chrome.
-            # On Semaphore, browsers are already installed.
-            - python manage.py test tasks.tests.test_browser
-
-
-  - name: "Run Security Tests"
+            - >-
+              echo "ocedis koliko mozes ono meso sto se kuvalo u prvom job-u 2
+              RINGLE Blocka"
+            - echo "stavis na tiganj da ispari voda" && sleep 50
+            - echo "dodas malo ulja"
+            - 'echo "usitnis meso koliko mozes viljuskom i nozem :D"'
+            - echo "dodas so i kurkumu"
+            - echo "cekas da se malo zacrveni"  && sleep 5
+  - name: Jos malo pa gotovo
+    dependencies:
+      - Rerna
+      - Ringla
     task:
-      # This block runs through the security checklist for the project.
       jobs:
-        - name: Deployment Checklist
+        - name: Ubaciti sve artifacte u rernu
           commands:
-           - checkout
-           - cache restore
-           - pip install -r requirements.txt --cache-dir .pip_cache
-           # Test if project can be deployed securely.
-           - python manage.py check --deploy --fail-level ERROR
+            - echo "napunis camcice iz TEPSIJA blocka mesom iz RINGLA Blocka"
+            - echo "prelijes ^ prelivom iz PRELIV Blocka"
+            - echo "Stavis u rernu i povremeno gledas jerry gotovo" && sleep 150
+  - name: Priprema sastojaka
+    dependencies: []
+    task:
+      jobs:
+        - name: Hrana
+          commands:
+            - echo "500g belog mesa"
+            - echo "1x0.2l solja pirinca"
+            - echo "0.3l soka od paradajza"
+            - echo "4 jajeta"
+            - echo "6 tikvica"
+            - echo "0.6g sampinjona (moze se i izostaviti)"
+        - name: Zacini - proizvoljno
+          commands:
+            - echo "himalajska so (ili zamena)"
+            - echo "kurkuma po zelji"
+            - echo "origano ili zamena po zelji"
+            - echo "seme lana po zelji"
+  - name: PRIPREMA SAMPINJONA
+    dependencies:
+      - Priprema sastojaka
+    task:
+      jobs:
+        - name: priprema sampinjona
+          commands:
+            - echo "iseckati sampinjone" && sleep 10
+  - name: Rerna
+    dependencies:
+      - TEPSIJA
+    task:
+      jobs:
+        - name: Zagrejati rernu
+          commands:
+            - echo "ukljuciti na 200"
+            - sleep 200
+  - name: TEPSIJA
+    dependencies:
+      - Preliv
+    task:
+      jobs:
+        - name: Pakovanje camcica
+          commands:
+            - echo "stavis peci papir na tepsiju"
+            - echo "dodas camcice tikvice iz PRIPREMA TIKVICA Bloka"
+            - sleep 50
+  - name: RINGLA 1
+    dependencies:
+      - PRIPREMA TIKVICA
+    task:
+      jobs:
+        - name: belo meso & tikvice & sampinjoni
+          commands:
+            - >-
+              echo "u vecoj serpi pomesati belo meso, iznutrice tikvica,
+              iseckane sampinjone" && sleep 300
+            - echo "kuva se dok se ne skuva meso"
+  - name: Priprema posuda
+    dependencies: []
+    task:
+      jobs:
+        - name: Posude
+          commands:
+            - echo "2 serpe"
+            - echo "2 ringle"
+            - echo "1 rerna"
+            - echo "1 tiganj"
+            - echo "1 solja 0.2l"
+            - echo "1 tepsija & peci papir po potrebi"
+            - echo "jedna cinija za mesanje jaja i paradajza"
