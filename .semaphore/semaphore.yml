@@ -66,6 +66,7 @@ blocks:
             - echo "napunis camcice iz TEPSIJA blocka mesom iz RINGLA Blocka"
             - echo "prelijes ^ prelivom iz PRELIV Blocka"
             - echo "Stavis u rernu i povremeno gledas jerry gotovo" && sleep 150
+            - touch artifacts_example.md && artifact push job artifacts_example.md
   - name: Priprema sastojaka
     dependencies: []
     task:
